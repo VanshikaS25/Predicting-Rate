@@ -26,7 +26,7 @@ Pandas - https://pandas.pydata.org/
 
 time - https://docs.python.org/3/library/time.html
 
-### The extracted will lokk like this
+### The extracted will look like this
 
 ![details](https://user-images.githubusercontent.com/100691826/177965006-e12c293b-a973-407c-8418-d87d89327a22.PNG)
 
