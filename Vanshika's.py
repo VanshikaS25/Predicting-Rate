@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 from selenium import webdriver
 import os
 from selenium.webdriver.common.by import By
@@ -11,22 +5,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from time import sleep
 from selenium.webdriver.common.keys import Keys
-
-
-# In[2]:
-
-
 from sklearn import preprocessing
-
-
-# In[3]:
-
-
 from bs4 import BeautifulSoup
-
-
-# In[13]:
-
 
 PATH = 'G:\chromedriver.exe'
 option = webdriver.ChromeOptions() 
@@ -45,10 +25,7 @@ driver = webdriver.Chrome(chrome_options=option, executable_path=PATH)
 url = 'https://www.magicbricks.com/property-for-sale/residential-real-estate?&proptype=Multistorey-Apartment,Builder-Floor-Apartment,Penthouse,Studio-Apartment,Residential-House,Villa&cityName=Noida'
 driver.get(url)
 
-
-# In[14]:
-
-
+# Scrolling the website till the end
 height = 0
 while True:
     #driver.execute_script("window.scroll(0, 0);")
@@ -61,18 +38,10 @@ while True:
     sleep(10)
     height = n_height
 
-
-# In[15]:
-
-
 html = driver.page_source
 soup = BeautifulSoup(html)
 con = soup.find_all('div',class_ = 'mb-srp__card__info')
 container2 = soup.find_all('div',class_ = 'mb-srp__card__estimate')
-
-
-# In[16]:
-
 
 project = []
 location = []
@@ -84,9 +53,6 @@ carpet_area = []
 super_area = []
 price = []
 rate = []
-
-
-# In[17]:
 
 
 for c in con:
@@ -144,10 +110,7 @@ for c in con:
     carpet_area.append(float(c_area))
 
 
-# In[18]:
-
-
-for e in container2:
+    for e in container2:
     pri = 0
     r = 0
     if e.find('div',class_='mb-srp__card__price--amount') is not None:
@@ -171,15 +134,9 @@ for e in container2:
         
     rate.append(float(r))
     price.append(float(pri))
-
-
-# In[19]:
-
+    
 
 driver.quit()
-
-
-# In[44]:
 
 
 import pandas as pd
@@ -197,52 +154,11 @@ dic = {
 }
 df = pd.DataFrame(dic)
 
-
-# In[75]:
-
-
 df.to_csv('details.csv', index = False)
-
-
-# In[ ]:
-
-
-
-
-
-# In[130]:
-
-
-import pandas as pd
-df = pd.read_csv('details.csv')
-
-
-# In[131]:
-
-
-df.shape
-
-
-# In[132]:
-
-
-df.columns
-
-
-# In[133]:
-
 
 df.head()
 
-
-# In[134]:
-
-
 df.dropna(subset=['project','bhk', 'price', 'total_floors','location','rate'], axis=0, inplace=True)
-
-
-# In[135]:
-
 
 df['bhk'] = df['bhk'].str.replace('> 10','10')
 df['bhk'] = df['bhk'].str.replace(' ','')
@@ -252,54 +168,25 @@ df['total_floors'] = df['total_floors'].replace('Ground', "1", regex=True)
 df['total_floors'] = df['total_floors'].astype(int)
 
 
-# In[136]:
-
-
 df['bathroom'] = df['bathroom'].replace('> 10', '11', regex=True)
 df['bathroom'] = df['bathroom'].astype(int)
 df['project'] = df['project'].astype(str)
 df['location'] = df['location'].astype(str)
 df['furnishing'] = df['furnishing'].astype(str)
 
-
-# In[137]:
-
-
 df.drop(df.index[df['bhk'] == 0], inplace=True)
 df.drop(df.index[df['total_floors'] == 0], inplace=True)
 df.drop(df.index[df['rate'] == 0], inplace=True)
-
-
-# In[138]:
-
-
-df.shape
-
-
-# In[139]:
-
 
 #Removing spaces from starting from location
 df['location'] = df['location'].str.strip()
 df['project'] = df['project'].str.strip()
 
-
-# In[140]:
-
-
 df.drop(df.index[df['bhk'] == ">"], inplace=True)
 df["bhk"] = pd.to_numeric(df["bhk"])
 df["bhk"] = df["bhk"].astype(int)
 
-
-# In[141]:
-
-
 df = df.drop_duplicates()
-
-
-# In[142]:
-
 
 def g(row):
     if (row['carpet area']) != 0:
@@ -311,47 +198,17 @@ def g(row):
     else:
         val = None
     return val
-
-#create new column 'Good' using the function above
 df['Carpet Area'] = df.apply(g, axis=1)
-
-
-# In[143]:
-
-
-df.head()
-
-
-# In[144]:
-
-
-# Training the models
-
-
-# In[145]:
 
 
 x_cols = ['project','location','total_floors','bhk','Carpet Area']
 y_cols = ['rate']
 
 
-# In[ ]:
-
-
-
-
-
-# In[146]:
-
-
 new_data = df.copy()
 
 X = new_data[x_cols]
 Y = new_data[y_cols]
-
-
-# In[148]:
-
 
 from sklearn.preprocessing import LabelEncoder,Normalizer,MinMaxScaler,StandardScaler
 LE_project=LabelEncoder()
@@ -363,15 +220,7 @@ new_data['project_code'] = X['project_code']
 new_data['location_code'] = X['location_code']
 X.drop(['project','location'],axis=1,inplace=True)
 
-
-# In[107]:
-
-
 #Training different models
-
-
-# In[149]:
-
 
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -379,74 +228,30 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn import metrics
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn import preprocessing
-
-
-# In[150]:
-
-
-#training the models
 from sklearn.model_selection import train_test_split
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=101) 
-
-
-# In[151]:
-
 
 # Linear Regression
 from sklearn.linear_model import LinearRegression
 lin_reg = LinearRegression()
 lin_reg.fit(X_train, y_train)
-
-
-# In[152]:
-
-
 predictions = lin_reg.predict(X_test)
 
-
-# In[153]:
-
-
 # Graident Boosting
-
-
-# In[154]:
-
-
 from sklearn.ensemble import GradientBoostingRegressor
-
 gradient_boosting = GradientBoostingRegressor(n_estimators=500, max_depth=8, learning_rate=0.05, random_state=42)
 # print(x_train,y_train)
 print(type(X_train),type(y_train))
 gradient_boosting.fit(X_train, y_train)
-
-
-# In[155]:
-
-
 gred = gradient_boosting.predict(X_test)
-
-
-# In[156]:
-
 
 #Random Forest
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
-
 random_forest = RandomForestRegressor(n_estimators=50, random_state=0)
 random_forest.fit(X_train, y_train)
-
-
-# In[157]:
-
-
 ran = random_forest.predict(X_test)
-
-
-# In[158]:
-
 
 # Random Forest Regressor
 import numpy as np
@@ -471,72 +276,16 @@ random_grid = {'n_estimators' : n_estimators,
               'min_samples_split': min_samples_split,
               'min_samples_leaf' : min_samples_leaf}
 
-
-# In[159]:
-
-
 rf = RandomForestRegressor()
 rf_random = RandomizedSearchCV(estimator = rf, param_distributions = random_grid, scoring = 'neg_mean_squared_error',
                                n_iter=10, cv=5, verbose=2, random_state=42, n_jobs=1)
 rf_random.fit(X_train, y_train)
-
-
-# In[160]:
-
-
 random_forest = rf_random.predict(X_test)
 
-
-# In[161]:
-
-
 t = X_test
-
-
-# In[162]:
-
-
 t['Actual Rate'] = y_test
-
-
-# In[163]:
-
-
 t['Linear Regression'] = predictions
-
-
-# In[164]:
-
-
 t['Random_forest_Regressor'] = random_forest
-
-
-# In[165]:
-
-
 t['Random Forest'] = ran
-
-
-# In[166]:
-
-
 t['Gradient Boosting'] = gred
-
-
-# In[167]:
-
-
-t
-
-
-# In[168]:
-
-
 t.to_csv('test_data.csv', index=False)
-
-
-# In[ ]:
-
-
-
-
